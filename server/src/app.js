@@ -4,6 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 import hpp from "hpp";
 import cookieParser from "cookie-parser";
+import authRoutes from "./routes/authRoutes.js";
 
 import sanitize from "./middleware/sanitize.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
@@ -37,7 +38,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // Routes will be added here in the next phases
-
+app.use("/api/auth", authRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
