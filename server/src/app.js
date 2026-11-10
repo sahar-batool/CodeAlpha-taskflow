@@ -5,6 +5,10 @@ import morgan from "morgan";
 import hpp from "hpp";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import columnRoutes from "./routes/columnRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
 
 import sanitize from "./middleware/sanitize.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
@@ -39,6 +43,11 @@ app.get("/api/health", (req, res) => {
 
 // Routes will be added here in the next phases
 app.use("/api/auth", authRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/columns", columnRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/comments", commentRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
 
