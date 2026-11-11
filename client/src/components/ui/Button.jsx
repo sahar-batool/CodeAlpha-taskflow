@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import Spinner from "./Spinner";
 
 const variants = {
-  primary: "bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/30",
+  primary: "bg-brand-600 text-[#fff] hover:bg-brand-700 shadow-sm shadow-brand-600/30",
   secondary: "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50",
   ghost: "text-slate-600 hover:bg-slate-100",
-  danger: "bg-red-600 text-white hover:bg-red-700",
+  danger: "bg-red-600 text-[#fff] hover:bg-red-700",
 };
 
 export default function Button({

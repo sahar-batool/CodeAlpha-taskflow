@@ -12,8 +12,8 @@ const points = [
 export default function AuthLayout({ title, subtitle, children, footer }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-linear-to-br from-brand-600 via-brand-700 to-slate-900 p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+      <div className="relative hidden overflow-hidden bg-linear-to-br from-brand-600 via-brand-700 to-slate-900 p-12 text-[#fff] lg:flex lg:flex-col lg:justify-between">
+        <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[#fff]/10 blur-3xl" />
         <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-brand-500/40 blur-3xl" />
         <div className="relative"><Logo light /></div>
         <div className="relative">
@@ -29,7 +29,7 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
                 transition={{ delay: 0.3 + i * 0.15 }}
                 className="flex items-center gap-3 text-brand-100"
               >
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#fff]/20">
                   <Check size={14} />
                 </span>
                 {p}

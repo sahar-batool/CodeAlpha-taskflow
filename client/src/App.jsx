@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import AppLayout from "./components/AppLayout";
 import Board from "./pages/Board";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (

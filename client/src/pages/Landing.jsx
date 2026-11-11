@@ -4,6 +4,7 @@ import { ArrowRight, LayoutDashboard, Users, MessageSquare, Zap, Shield, Bell } 
 import Logo from "../components/Logo";
 import Button from "../components/ui/Button";
 import { useAuth } from "../context/AuthContext";
+import ThemeToggle from "../components/ThemeToggle";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -38,6 +39,7 @@ function Navbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Logo />
         <nav className="flex items-center gap-2">
+          <ThemeToggle />
           {user ? (
             <Link to="/dashboard"><Button>Open dashboard</Button></Link>
           ) : (
@@ -95,6 +97,7 @@ export default function Landing() {
   const { user } = useAuth();
   return (
     <div className="overflow-x-hidden">
+      
       <Navbar />
 
       <section className="relative px-6 pb-24 pt-20 text-center">
@@ -163,7 +166,7 @@ export default function Landing() {
                 custom={i}
                 className="text-center"
               >
-                <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-white">{s.n}</span>
+                <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-[#fff]">{s.n}</span>
                 <h3 className="mt-4 text-lg font-semibold">{s.title}</h3>
                 <p className="mt-1.5 text-sm text-slate-600">{s.text}</p>
               </motion.div>
@@ -177,7 +180,7 @@ export default function Landing() {
           initial={{ opacity: 0, scale: 0.96 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="mx-auto max-w-4xl rounded-3xl bg-linear-to-br from-brand-600 to-slate-900 px-8 py-16 text-center text-white"
+          className="mx-auto max-w-4xl rounded-3xl bg-linear-to-br from-brand-600 to-slate-900 px-8 py-16 text-center text-[#fff]"
         >
           <h2 className="text-3xl font-extrabold sm:text-4xl">Ready to organize your next project?</h2>
           <p className="mx-auto mt-3 max-w-lg text-brand-100">Create your free account and invite your team in minutes.</p>
