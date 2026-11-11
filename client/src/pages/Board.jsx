@@ -13,6 +13,7 @@ import MembersModal from "../components/board/MembersModal";
 import Button from "../components/ui/Button";
 import Spinner from "../components/ui/Spinner";
 import TaskModal from "../components/board/TaskModal";
+import { socket } from "../lib/socket";
 
 const groupTasks = (columns, tasks) => {
   const map = {};
@@ -59,6 +60,85 @@ export default function Board() {
   useEffect(() => {
     loadBoard();
   }, [loadBoard]);
+
+    const refreshBoard = useCallback(async () => {
+    if (startRef.current) return setTimeout(() => refreshBoard(), 800);
+    try {
+      const [p, b] = await Promise.all([
+        api.get(`/projects/${projectId}`),
+        api.get(`/projects/${projectId}/board`),
+      ]);
+      setProject(p.data.project);
+      setRole(p.data.role);
+      setColumns(b.data.columns);
+      setItems(groupTasks(b.data.columns, b.data.tasks));
+    } catch {
+      
+    }
+  }, [projectId]);
+
+    
+  useEffect(() => {
+    const join = () => socket.emit("project:join", projectId);
+    const onReconnect = () => {
+      join();
+      refreshBoard();
+    };
+    if (socket.connected) join();
+    socket.on("connect", onReconnect);
+    return () => {
+      socket.off("connect", onReconnect);
+      socket.emit("project:leave", projectId);
+    };
+  }, [projectId, refreshBoard]);
+
+
+  useEffect(() => {
+    const onCreated = (task) =>
+      setItems((prev) =>
+        !prev[task.column] || prev[task.column].some((t) => t._id === task._id)
+          ? prev
+          : { ...prev, [task.column]: [...prev[task.column], task] }
+      );
+
+    const onUpdated = (task) =>
+      setItems((prev) =>
+        !prev[task.column]
+          ? prev
+          : { ...prev, [task.column]: prev[task.column].map((t) => (t._id === task._id ? task : t)) }
+      );
+
+    const onDeleted = ({ id, column }) =>
+      setItems((prev) =>
+        !prev[column] ? prev : { ...prev, [column]: prev[column].filter((t) => t._id !== id) }
+      );
+
+    const onProjectDeleted = () => {
+      toast("This project was deleted by its owner");
+      navigate("/dashboard", { replace: true });
+    };
+
+    const onRemoved = ({ projectId: id }) => {
+      if (id !== projectId) return;
+      toast("You were removed from this project");
+      navigate("/dashboard", { replace: true });
+    };
+
+    socket.on("task:created", onCreated);
+    socket.on("task:updated", onUpdated);
+    socket.on("task:deleted", onDeleted);
+    socket.on("board:refresh", refreshBoard);
+    socket.on("project:deleted", onProjectDeleted);
+    socket.on("member:removed", onRemoved);
+    return () => {
+      socket.off("task:created", onCreated);
+      socket.off("task:updated", onUpdated);
+      socket.off("task:deleted", onDeleted);
+      socket.off("board:refresh", refreshBoard);
+      socket.off("project:deleted", onProjectDeleted);
+      socket.off("member:removed", onRemoved);
+    };
+  }, [projectId, navigate, refreshBoard]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),

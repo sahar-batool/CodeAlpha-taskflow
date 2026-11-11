@@ -4,6 +4,8 @@ import Comment from "../models/Comment.js";
 import AppError from "../utils/AppError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { getProjectForMember, getTaskForMember } from "../utils/access.js";
+import { emitToProject } from "../utils/realtime.js";
+import { notify } from "../utils/notify.js";
 
 const assertAssignee = (project, assigneeId) => {
   if (!assigneeId) return;
@@ -34,6 +36,18 @@ export const createTask = asyncHandler(async (req, res) => {
   });
   await task.populate("assignee", "name email");
 
+  emitToProject(req, project._id, "task:created", task);
+  if (task.assignee) {
+    await notify({
+      users: [task.assignee._id],
+      actor: req.user._id,
+      type: "task_assigned",
+      message: `${req.user.name} assigned you "${task.title}"`,
+      project: project._id,
+      task: task._id,
+    });
+  }
+
   res.status(201).json({ success: true, task });
 });
 
@@ -47,6 +61,7 @@ export const updateTask = asyncHandler(async (req, res) => {
   const { task, project } = await getTaskForMember(req.params.id, req.user._id);
 
   if (req.body.assignee !== undefined) assertAssignee(project, req.body.assignee);
+  const prevAssignee = task.assignee ? task.assignee.toString() : null;
 
   const allowed = ["title", "description", "priority", "dueDate", "assignee"];
   allowed.forEach((key) => {
@@ -55,6 +70,19 @@ export const updateTask = asyncHandler(async (req, res) => {
 
   await task.save();
   await task.populate("assignee", "name email");
+
+  emitToProject(req, task.project, "task:updated", task);
+  const newAssignee = task.assignee ? task.assignee._id.toString() : null;
+  if (newAssignee && newAssignee !== prevAssignee) {
+    await notify({
+      users: [newAssignee],
+      actor: req.user._id,
+      type: "task_assigned",
+      message: `${req.user.name} assigned you "${task.title}"`,
+      project: task.project,
+      task: task._id,
+    });
+  }
 
   res.json({ success: true, task });
 });
@@ -92,6 +120,9 @@ export const moveTask = asyncHandler(async (req, res) => {
   }
 
   const updated = await Task.findById(task._id).populate("assignee", "name email");
+
+  emitToProject(req, task.project, "board:refresh");
+
   res.json({ success: true, task: updated });
 });
 
@@ -104,6 +135,8 @@ export const deleteTask = asyncHandler(async (req, res) => {
 
   await Comment.deleteMany({ task: task._id });
   await task.deleteOne();
+
+  emitToProject(req, task.project, "task:deleted", { id: task._id, column: task.column });
 
   res.json({ success: true, message: "Task deleted" });
 });

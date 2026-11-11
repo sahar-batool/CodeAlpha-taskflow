@@ -7,6 +7,7 @@ import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import Spinner from "../ui/Spinner";
 import { initials } from "../../lib/utils";
+import { socket } from "../../lib/socket";
 
 const field =
   "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100";
@@ -40,6 +41,22 @@ function TaskDetails({ task, project, isOwner, onUpdated, onDeleted }) {
       .finally(() => active && setLoadingComments(false));
     return () => {
       active = false;
+    };
+  }, [task._id]);
+
+    useEffect(() => {
+    const onNew = ({ taskId, comment }) => {
+      if (taskId !== task._id) return;
+      setComments((prev) => (prev.some((c) => c._id === comment._id) ? prev : [...prev, comment]));
+    };
+    const onDel = ({ taskId, id }) => {
+      if (taskId === task._id) setComments((prev) => prev.filter((c) => c._id !== id));
+    };
+    socket.on("comment:created", onNew);
+    socket.on("comment:deleted", onDel);
+    return () => {
+      socket.off("comment:created", onNew);
+      socket.off("comment:deleted", onDel);
     };
   }, [task._id]);
 

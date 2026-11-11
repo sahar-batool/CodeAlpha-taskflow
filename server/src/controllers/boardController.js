@@ -4,6 +4,7 @@ import Comment from "../models/Comment.js";
 import AppError from "../utils/AppError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { getProjectForMember, requireOwner } from "../utils/access.js";
+import { emitToProject } from "../utils/realtime.js";
 
 const MAX_COLUMNS = 12;
 
@@ -14,7 +15,7 @@ export const getBoard = asyncHandler(async (req, res) => {
     Column.find({ project: project._id }).sort("order"),
     Task.find({ project: project._id }).sort("order").populate("assignee", "name email"),
   ]);
-
+  emitToProject(req, project._id, "board:refresh");
   res.json({ success: true, columns, tasks });
 });
 
@@ -29,7 +30,7 @@ export const createColumn = asyncHandler(async (req, res) => {
     title: req.body.title,
     order: count,
   });
-
+  emitToProject(req, project._id, "board:refresh");
   res.status(201).json({ success: true, column });
 });
 
@@ -40,7 +41,7 @@ export const updateColumn = asyncHandler(async (req, res) => {
 
   column.title = req.body.title;
   await column.save();
-
+  emitToProject(req, project._id, "board:refresh");
   res.json({ success: true, column });
 });
 
@@ -54,6 +55,6 @@ export const deleteColumn = asyncHandler(async (req, res) => {
   await Comment.deleteMany({ task: { $in: taskIds } });
   await Task.deleteMany({ column: column._id });
   await column.deleteOne();
-
+  emitToProject(req, project._id, "board:refresh");
   res.json({ success: true, message: "Column deleted" });
 });

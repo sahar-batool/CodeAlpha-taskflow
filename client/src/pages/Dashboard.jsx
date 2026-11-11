@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Modal from "../components/ui/Modal";
+import { socket } from "../lib/socket";
 
 function ProjectSkeleton() {
   return <div className="h-36 animate-pulse rounded-2xl bg-slate-200/70" />;
@@ -27,6 +28,22 @@ export default function Dashboard() {
       .then((res) => setProjects(res.data.projects))
       .catch((err) => toast.error(getErrorMessage(err)))
       .finally(() => setLoading(false));
+  }, []);
+
+
+  useEffect(() => {
+    const reload = () =>
+      api
+        .get("/projects")
+        .then((res) => setProjects(res.data.projects))
+        .catch(() => {});
+
+    socket.on("projects:changed", reload);
+    socket.on("connect", reload);
+    return () => {
+      socket.off("projects:changed", reload);
+      socket.off("connect", reload);
+    };
   }, []);
 
   const handleCreate = async (e) => {

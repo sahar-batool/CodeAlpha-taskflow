@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import Logo from "./Logo";
 
+
 const points = [
   "Boards your whole team can see",
   "Assign tasks and set due dates",

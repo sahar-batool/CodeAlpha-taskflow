@@ -3,6 +3,7 @@ import { LogOut } from "lucide-react";
 import Logo from "./Logo";
 import { useAuth } from "../context/AuthContext";
 import { initials } from "../lib/utils";
+import NotificationBell from "./NotificationBell";
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
@@ -12,6 +13,7 @@ export default function AppLayout() {
         <div className="flex h-16 items-center justify-between px-6">
           <Logo />
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <span className="hidden text-sm font-medium text-slate-600 sm:block">{user.name}</span>
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">
               {initials(user.name)}
