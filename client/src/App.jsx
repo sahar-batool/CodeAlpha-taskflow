@@ -4,6 +4,8 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import AppLayout from "./components/AppLayout";
+import Board from "./pages/Board";
 
 export default function App() {
   return (
@@ -16,7 +18,10 @@ export default function App() {
       </Route>
 
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route element={<AppLayout />}>
+    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/projects/:projectId" element={<Board />} />
+  </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
