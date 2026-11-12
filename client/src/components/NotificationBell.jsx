@@ -57,7 +57,8 @@ export default function NotificationBell() {
       setItems((prev) => prev.map((x) => (x._id === n._id ? { ...x, read: true } : x)));
       setUnread((u) => Math.max(0, u - 1));
     }
-    navigate(`/projects/${n.project}`);
+        const gone = ["member_removed", "project_deleted"].includes(n.type);
+    navigate(gone ? "/dashboard" : `/projects/${n.project}`);
   };
 
   return (

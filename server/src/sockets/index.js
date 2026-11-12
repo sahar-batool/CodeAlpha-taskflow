@@ -23,14 +23,14 @@ export const initSocket = (server) => {
   // Reject anyone who isn't logged in
   io.use(async (socket, next) => {
     try {
-      const  token  = parse(socket.handshake.headers.cookie || "token");
+      const token = socket.handshake.auth?.token || getCookie(socket.handshake.headers.cookie, "token");
       if (!token) throw new Error("No token");
       const { id } = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(id).select("_id");
       if (!user) throw new Error("No user");
       socket.userId = user._id.toString();
       next();
-    } catch {
+    } catch (err) {
       next(new Error("Not authenticated"));
     }
   });
@@ -46,6 +46,7 @@ export const initSocket = (server) => {
         const isMember = await Project.exists({ _id: projectId, "members.user": socket.userId });
         if (!isMember) return ack?.({ ok: false });
         socket.join(`project:${projectId}`);
+         
         ack?.({ ok: true });
       } catch {
         ack?.({ ok: false });

@@ -30,6 +30,8 @@ export const createProject = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, project });
 });
 
+
+
 export const getMyProjects = asyncHandler(async (req, res) => {
   const projects = await Project.find({ "members.user": req.user._id })
     .populate("members.user", "name email")
@@ -37,11 +39,15 @@ export const getMyProjects = asyncHandler(async (req, res) => {
   res.json({ success: true, projects });
 });
 
+
+
 export const getProject = asyncHandler(async (req, res) => {
   const { project, role } = await getProjectForMember(req.params.projectId, req.user._id);
   await project.populate("members.user", "name email");
   res.json({ success: true, project, role });
 });
+
+
 
 export const updateProject = asyncHandler(async (req, res) => {
   const { project, role } = await getProjectForMember(req.params.projectId, req.user._id);
@@ -66,9 +72,18 @@ export const deleteProject = asyncHandler(async (req, res) => {
     emitToProject(req, project._id, "project:deleted");
   closeProjectRoom(project._id);
     memberIds.forEach((id) => emitToUser(id, "projects:changed"));
+      await notify({
+    users: memberIds,
+    actor: req.user._id,
+    type: "project_deleted",
+    message: `${req.user.name} deleted the project "${project.name}"`,
+    project: project._id,
+  });
 
   res.json({ success: true, message: "Project deleted" });
 });
+
+
 
 export const addMember = asyncHandler(async (req, res) => {
   const { project, role } = await getProjectForMember(req.params.projectId, req.user._id);
@@ -97,6 +112,8 @@ export const addMember = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, project });
 });
 
+
+
 export const removeMember = asyncHandler(async (req, res) => {
   const { project, role } = await getProjectForMember(req.params.projectId, req.user._id);
   const targetId = req.params.userId;
@@ -119,6 +136,13 @@ export const removeMember = asyncHandler(async (req, res) => {
     emitToProject(req, project._id, "board:refresh");
   removeUserFromProject(targetId, project._id);
       emitToUser(targetId, "projects:changed");
+        await notify({
+    users: [targetId],
+    actor: req.user._id,
+    type: "member_removed",
+    message: `${req.user.name} removed you from "${project.name}"`,
+    project: project._id,
+  });
 
   res.json({ success: true, message: "Member removed" });
 });

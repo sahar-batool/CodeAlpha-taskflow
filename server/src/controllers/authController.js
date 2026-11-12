@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import AppError from "../utils/AppError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendTokenCookie, clearTokenCookie } from "../utils/token.js";
+import jwt from "jsonwebtoken";
 
 const publicUser = (user) => ({
   id: user._id,
@@ -40,4 +41,9 @@ export const logout = (req, res) => {
 
 export const getMe = (req, res) => {
   res.json({ success: true, user: publicUser(req.user) });
+};
+
+export const socketToken = (req, res) => {
+  const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, { expiresIn: "2m" });
+  res.json({ success: true, token });
 };

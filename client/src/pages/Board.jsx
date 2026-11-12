@@ -275,7 +275,7 @@ const handleTaskDeleted = (task) => {
   }));
   setSelectedId(null);
 };
-  if (loading) {
+  if (loading || !project) {
     return (
       <div className="flex h-[60vh] items-center justify-center text-brand-600">
         <Spinner size={36} />

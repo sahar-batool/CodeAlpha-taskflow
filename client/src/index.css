@@ -55,3 +55,9 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+
+.dark {
+  --color-brand-50: #1e1b4b;
+  --color-brand-100: #312e81;
+}

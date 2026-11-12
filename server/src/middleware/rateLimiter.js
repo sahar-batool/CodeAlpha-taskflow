@@ -1,22 +1,35 @@
 import rateLimit from "express-rate-limit";
 
-const handler = (message) => (req, res) =>
-  res.status(429).json({ success: false, message });
+const isDev = process.env.NODE_ENV === "development";
 
-// General limiter for all API routes
-export const apiLimiter = rateLimit({
+const make = ({ windowMs, max, message, ...rest }) =>
+  rateLimit({
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => res.status(429).json({ success: false, message }),
+    ...rest,
+  });
+
+// Tier 1: everything else (boards, tasks, comments, notifications). Generous.
+export const apiLimiter = make({
   windowMs: 15 * 60 * 1000,
-  max: 300,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: handler("Too many requests, please try again later"),
+  max: isDev ? 5000 : 1500,
+  message: "Too many requests, please try again later",
 });
 
-// Stricter limiter for login/register (brute-force protection)
-export const authLimiter = rateLimit({
+// Tier 2: login. Strict, and only FAILED attempts count.
+export const loginLimiter = make({
   windowMs: 15 * 60 * 1000,
   max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: handler("Too many attempts, please try again in 15 minutes"),
+  skipSuccessfulRequests: true,
+  message: "Too many failed login attempts, please try again in 15 minutes",
+});
+
+// Tier 3: register and future password reset. Very strict.
+export const strictLimiter = make({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: "Too many attempts, please try again in an hour",
 });

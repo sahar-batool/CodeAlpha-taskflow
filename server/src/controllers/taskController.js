@@ -127,7 +127,7 @@ export const moveTask = asyncHandler(async (req, res) => {
 });
 
 export const deleteTask = asyncHandler(async (req, res) => {
-  const { task, role } = await getTaskForMember(req.params.id, req.user._id);
+  const { task, role, project } = await getTaskForMember(req.params.id, req.user._id);
 
   if (role !== "owner" && !task.createdBy.equals(req.user._id)) {
     throw new AppError("Only the task creator or project owner can delete this task", 403);
@@ -137,6 +137,17 @@ export const deleteTask = asyncHandler(async (req, res) => {
   await task.deleteOne();
 
   emitToProject(req, task.project, "task:deleted", { id: task._id, column: task.column });
+
+  const recipients = [task.assignee, task.createdBy]
+    .filter(Boolean)
+    .filter((id) => project.members.some((m) => m.user.equals(id)));
+  await notify({
+    users: recipients,
+    actor: req.user._id,
+    type: "task_deleted",
+    message: `${req.user.name} deleted "${task.title}"`,
+    project: project._id,
+  });
 
   res.json({ success: true, message: "Task deleted" });
 });

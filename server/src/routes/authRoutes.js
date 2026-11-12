@@ -1,8 +1,8 @@
 import express from "express";
 import { body } from "express-validator";
-import { register, login, logout, getMe } from "../controllers/authController.js";
+import { register, login, logout, getMe, socketToken} from "../controllers/authController.js";
 import { protect } from "../middleware/auth.js";
-import { authLimiter } from "../middleware/rateLimiter.js";
+import { loginLimiter, strictLimiter } from "../middleware/rateLimiter.js";
 import validate from "../middleware/validate.js";
 
 const router = express.Router();
@@ -15,7 +15,7 @@ const emailRule = body("email")
 
 router.post(
   "/register",
-  authLimiter,
+  strictLimiter,
   [
     body("name")
       .isString().withMessage("Name is required")
@@ -34,7 +34,7 @@ router.post(
 
 router.post(
   "/login",
-  authLimiter,
+  loginLimiter,
   [emailRule, body("password").isString().notEmpty().withMessage("Password is required")],
   validate,
   login
@@ -42,5 +42,6 @@ router.post(
 
 router.post("/logout", logout);
 router.get("/me", protect, getMe);
+router.get("/socket-token", protect, socketToken);
 
 export default router;
