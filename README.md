@@ -125,6 +125,7 @@ taskflow/
 - Rate-limit counters are stored in memory, so a multi-instance deployment would need a shared store such as Redis
 - Moves and column changes sync by reloading the board rather than patching individual cards
 - Members can only be invited if they already have an account
+- In production the frontend and API are on different domains, so browsers that block third-party cookies (such as Safari) may fail to keep users logged in. A custom domain shared by both would solve this.
 
 ## Author
 
