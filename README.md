@@ -2,8 +2,8 @@
 
 A real-time collaborative project management tool (Trello/Asana-style) built with the MERN stack and Socket.io.
 
-**Live demo:** YOUR_VERCEL_URL
-**API:** YOUR_RENDER_URL/api/health
+**Live demo:** https://code-alpha-taskflow-one.vercel.app
+**API:** https://codealphataskflow-c6zqjsne.back4.app/api/health
 
 ![Landing page](docs/screenshots/landing.png)
 
@@ -126,6 +126,7 @@ taskflow/
 - Moves and column changes sync by reloading the board rather than patching individual cards
 - Members can only be invited if they already have an account
 - In production the frontend and API are on different domains, so browsers that block third-party cookies (such as Safari) may fail to keep users logged in. A custom domain shared by both would solve this.
+
 
 ## Author
 
